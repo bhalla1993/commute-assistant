@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Commute Assistant</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Google AdSense — replace ca-pub-XXXXXXXXXXXXXXXX with your publisher ID -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"
+          crossorigin="anonymous"></script>
+</head>
+<body>
+
+  <!-- ── Left Sidebar ───────────────────────────────────────────────────── -->
+  <aside id="sidebar">
+    <div class="sidebar__header">
+      <span class="sidebar__app-icon" aria-hidden="true">🚌</span>
+      <span>Commute Assistant</span>
+    </div>
+
+    <button id="btn-new-chat" class="btn-new-chat" aria-label="Start new chat">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2" width="16" height="16" aria-hidden="true">
+        <path d="M12 5v14M5 12h14"/>
+      </svg>
+      New Chat
+    </button>
+
+    <!-- Nav area: route status card + chat history -->
+    <div class="sidebar__nav">
+      <div id="status-card" class="status-card hidden" role="region" aria-label="Saved route status">
+        <div class="status-card__body">
+          <span id="status-icon" class="status-icon" aria-hidden="true">🚌</span>
+          <div class="status-card__text">
+            <p id="status-route" class="status-card__route">Route —</p>
+            <p id="status-detail" class="status-card__detail">Checking…</p>
+          </div>
+        </div>
+        <div class="status-card__actions">
+          <button id="btn-refresh-route" class="btn btn--ghost btn--sm" aria-label="Refresh route status" title="Refresh">↻</button>
+          <button id="btn-edit-route" class="btn btn--ghost btn--sm" aria-label="Edit saved route">Edit</button>
+          <button id="btn-remove-route" class="btn btn--ghost btn--sm btn--danger" aria-label="Remove saved route">Remove</button>
+        </div>
+      </div>
+
+      <!-- Chat history list -->
+      <div id="chat-history-section" class="history-section hidden" aria-label="Recent chats">
+        <p class="history-section__header">Recent chats</p>
+        <div id="chat-history-list" class="history-list" role="list"></div>
+      </div>
+    </div>
+
+    <!-- Sidebar footer: user info + theme toggle -->
+    <div class="sidebar__footer">
+      <div id="sidebar-user" class="sidebar-user hidden">
+        <span id="sidebar-user-avatar" class="sidebar-user__avatar" aria-hidden="true"></span>
+        <div class="sidebar-user__info">
+          <div class="sidebar-user__name-row">
+            <span id="sidebar-user-name" class="sidebar-user__name"></span>
+            <button id="btn-edit-display-name" class="btn-edit-name" aria-label="Edit display name" title="Edit display name">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                   stroke-linejoin="round" width="12" height="12" aria-hidden="true">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+            </button>
+          </div>
+          <!-- Inline edit form (hidden by default) -->
+          <div id="display-name-edit-form" class="display-name-edit hidden">
+            <input id="display-name-input" class="display-name-input" type="text"
+                   maxlength="32" autocomplete="off" aria-label="New display name" />
+            <div class="display-name-edit__actions">
+              <button id="btn-save-display-name" class="btn btn--primary btn--xs">Save</button>
+              <button id="btn-cancel-display-name" class="btn btn--ghost btn--xs">Cancel</button>
+            </div>
+            <p id="display-name-error" class="display-name-error hidden" role="alert"></p>
+          </div>
+          <span id="sidebar-user-email" class="sidebar-user__email"></span>
+        </div>
+      </div>
+      <!-- Query counter (free users only — hidden for premium) -->
+      <div id="query-counter" class="query-counter hidden" aria-live="polite">
+        <div class="query-counter__text">
+          <span id="queries-used-label">0 / 3 free queries used today</span>
+        </div>
+        <button id="btn-upgrade-from-counter" class="btn btn--accent btn--sm">Upgrade</button>
+      </div>
+
+      <div class="sidebar__footer-actions">
+        <button id="btn-logout" class="btn btn--ghost btn--sm btn--danger hidden" aria-label="Sign out" title="Sign out">
+          Sign out
+        </button>
+        <button id="btn-theme-toggle" class="btn-theme-toggle" aria-label="Toggle theme" title="Toggle theme">
+          ☀️
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── Main Content ───────────────────────────────────────────────────── -->
+  <div id="main">
+
+    <!-- Mobile-only top bar -->
+    <header id="mobile-header" aria-label="Navigation">
+      <button id="btn-hamburger" class="btn-hamburger" aria-label="Open sidebar" aria-expanded="false">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" width="22" height="22" aria-hidden="true">
+          <path d="M3 12h18M3 6h18M3 18h18"/>
+        </svg>
+      </button>
+      <span class="mobile-header__title">Commute Assistant</span>
+      <button id="btn-theme-toggle-mobile" class="btn-theme-toggle" aria-label="Toggle theme">
+        ☀️
+      </button>
+    </header>
+
+    <!-- Scrollable chat area -->
+    <main id="chat-area" class="chat-area" role="log" aria-live="polite" aria-label="Conversation">
+      <!-- chat bubbles injected by app.js -->
+    </main>
+
+    <!-- Input bar -->
+    <div class="input-bar">
+
+      <!-- Location notice strip (shown when GPS is unavailable) -->
+      <div id="location-error-banner" class="location-notice hidden" role="alert" aria-live="polite">
+        <span class="location-notice__icon" aria-hidden="true">📍</span>
+        <span class="location-notice__text">GPS unavailable</span>
+        <button id="btn-retry-location" class="location-notice__btn">retry GPS</button>
+      </div>
+
+      <!-- Location text fallback strip (shown when GPS fails — lets user type their area) -->
+      <div id="location-fallback" class="location-fallback-strip hidden" role="region" aria-label="Manual location">
+        <label for="location-text" class="location-fallback-strip__label">📍 Your area (for nearby queries):</label>
+        <input
+          id="location-text"
+          type="text"
+          class="input input--location"
+          placeholder="e.g. Ajax, ON or Whitby"
+          aria-label="Enter your area for nearby stop queries"
+          autocomplete="off"
+        />
+      </div>
+
+      <!-- AI status strip (shown when LLM provider is not configured) -->
+      <div id="ai-status-notice" class="ai-notice hidden" role="status" aria-live="polite">
+        <span class="ai-notice__icon" aria-hidden="true">🤖</span>
+        <span class="ai-notice__text">AI chat unavailable — tap a question above to get answers</span>
+        <button id="btn-check-ai" class="ai-notice__btn">Check again</button>
+      </div>
+
+      <div class="input-bar__box">
+
+        <!-- Location icon -->
+        <button id="btn-location" class="btn btn--icon" aria-label="Use my location" title="Share location">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round"
+               stroke-linejoin="round" width="18" height="18" aria-hidden="true">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+          </svg>
+        </button>
+
+        <!-- Message textarea -->
+        <textarea
+          id="message-input"
+          rows="1"
+          placeholder="Ask about buses, delays, routes…"
+          aria-label="Message"
+          autocomplete="off"
+          enterkeyhint="send"
+        ></textarea>
+
+        <!-- Send button -->
+        <button id="btn-send" class="btn btn--primary" aria-label="Send message">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+               width="18" height="18" aria-hidden="true">
+            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+          </svg>
+        </button>
+
+      </div>
+    </div>
+
+  </div><!-- /#main -->
+
+  <!-- Mobile sidebar overlay -->
+  <div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true"></div>
+
+  <!-- ── Auth overlay (shown when user is not logged in) ──────────────── -->
+  <div id="auth-overlay" class="auth-overlay" role="dialog" aria-modal="true" aria-label="Sign in to Commute Assistant">
+
+    <div class="auth-card">
+
+      <!-- Header -->
+      <div class="auth-card__header">
+        <span class="auth-card__icon" aria-hidden="true">🚌</span>
+        <h1 class="auth-card__title">Commute Assistant</h1>
+        <p class="auth-card__sub">Sign in to continue</p>
+      </div>
+
+      <!-- Error banner -->
+      <div id="auth-error" class="auth-error hidden" role="alert" aria-live="assertive"></div>
+
+      <!-- ── Login view (default) ────────────────────────────────── -->
+      <div id="auth-view-login" class="auth-view">
+        <form id="form-login" class="auth-form" novalidate>
+
+          <label class="auth-label" for="login-email">Email</label>
+          <input id="login-email" class="auth-input" type="email"
+                 placeholder="you@example.com" autocomplete="email" maxlength="254" required />
+
+          <label class="auth-label" for="login-password">Password</label>
+          <div class="pw-wrap">
+            <input id="login-password" class="auth-input" type="password"
+                   placeholder="Your password" autocomplete="current-password" maxlength="32" required />
+            <button type="button" class="pw-toggle" aria-label="Show password" tabindex="-1">
+              <svg class="pw-icon pw-icon--show" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg class="pw-icon pw-icon--hide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" aria-hidden="true" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+          </div>
+
+          <button type="submit" class="auth-btn auth-btn--primary" id="btn-login">
+            Sign In
+          </button>
+        </form>
+
+        <button class="auth-link-btn" id="btn-show-forgot">Forgot your password?</button>
+
+        <div class="auth-divider"><span>or</span></div>
+
+        <button class="auth-btn auth-btn--social auth-btn--google" id="btn-google-login">
+          <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
+            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+          </svg>
+          Continue with Google
+        </button>
+
+        <p class="auth-switch">
+          Don't have an account?
+          <button class="auth-link-btn" id="btn-show-signup">Create one</button>
+        </p>
+        <p class="auth-switch">
+          <button class="auth-link-btn" id="btn-show-terms-from-login">View Terms of Use &amp; Privacy Notice</button>
+        </p>
+      </div>
+
+      <!-- ── Signup view ─────────────────────────────────────────── -->
+      <div id="auth-view-signup" class="auth-view hidden">
+        <form id="form-signup" class="auth-form" novalidate>
+
+          <label class="auth-label" for="signup-name">Display name</label>
+          <input id="signup-name" class="auth-input" type="text"
+                 placeholder="Your name" autocomplete="name" maxlength="100" required />
+
+          <label class="auth-label" for="signup-email">Email</label>
+          <input id="signup-email" class="auth-input" type="email"
+                 placeholder="you@example.com" autocomplete="email" maxlength="254" required />
+
+          <label class="auth-label" for="signup-password">Password <span class="auth-hint">(8–32 chars, uppercase, number, special character)</span></label>
+          <div class="pw-wrap">
+            <input id="signup-password" class="auth-input" type="password"
+                   placeholder="Choose a strong password" autocomplete="new-password" maxlength="32" required />
+            <button type="button" class="pw-toggle" aria-label="Show password" tabindex="-1">
+              <svg class="pw-icon pw-icon--show" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg class="pw-icon pw-icon--hide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" aria-hidden="true" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+          </div>
+
+          <div class="terms-checkbox-row">
+            <input type="checkbox" id="signup-terms" class="terms-checkbox" required />
+            <label for="signup-terms" class="terms-checkbox-label">
+              I have read and agree to the
+              <button type="button" class="auth-link-btn" id="btn-show-terms-from-signup">Terms of Use &amp; Privacy Notice</button>
+            </label>
+          </div>
+
+          <button type="submit" class="auth-btn auth-btn--primary" id="btn-signup">
+            Create Account
+          </button>
+        </form>
+
+        <p class="auth-switch">
+          Already have an account?
+          <button class="auth-link-btn" id="btn-show-login">Sign in</button>
+        </p>
+        <p class="auth-switch">
+          <button class="auth-link-btn" id="btn-show-terms-from-signup-bottom">View Terms of Use &amp; Privacy Notice</button>
+        </p>
+      </div>
+
+      <!-- ── Forgot password view ────────────────────────────────── -->
+      <div id="auth-view-forgot" class="auth-view hidden">
+        <p class="auth-desc">Enter your email address and we'll send you a link to reset your password.</p>
+        <form id="form-forgot" class="auth-form" novalidate>
+          <label class="auth-label" for="forgot-email">Email</label>
+          <input id="forgot-email" class="auth-input" type="email"
+                 placeholder="you@example.com" autocomplete="email" maxlength="254" required />
+
+          <button type="submit" class="auth-btn auth-btn--primary" id="btn-forgot">
+            Send Reset Link
+          </button>
+        </form>
+
+        <p class="auth-switch">
+          <button class="auth-link-btn" id="btn-back-to-login">← Back to Sign In</button>
+        </p>
+      </div>
+
+      <!-- ── Reset password view (token from URL param) ──────────── -->
+      <div id="auth-view-reset" class="auth-view hidden">
+        <p class="auth-desc">Enter your new password below.</p>
+        <form id="form-reset" class="auth-form" novalidate>
+          <label class="auth-label" for="reset-password">New password <span class="auth-hint">(8–32 chars, uppercase, number, special character)</span></label>
+          <div class="pw-wrap">
+            <input id="reset-password" class="auth-input" type="password"
+                   placeholder="New password" autocomplete="new-password" maxlength="32" required />
+            <button type="button" class="pw-toggle" aria-label="Show password" tabindex="-1">
+              <svg class="pw-icon pw-icon--show" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg class="pw-icon pw-icon--hide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" aria-hidden="true" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+          </div>
+
+          <button type="submit" class="auth-btn auth-btn--primary" id="btn-reset">
+            Set New Password
+          </button>
+        </form>
+      </div>
+
+      <!-- ── Terms & Conditions view ──────────────────────────────── -->
+      <div id="auth-view-terms" class="auth-view hidden">
+        <div class="terms-content" tabindex="0" role="document" aria-label="Terms of Use and Privacy Notice">
+          <h2 class="terms-heading">Terms of Use &amp; Privacy Notice</h2>
+          <p class="terms-intro">Please read and agree to the following before using Commute Assistant.</p>
+
+          <h3 class="terms-section-title">1. Location Data</h3>
+          <p class="terms-body">Commute Assistant requires access to your device&apos;s GPS location to provide nearby stop information, route suggestions, and real-time transit services. Your coordinates are transmitted to our servers only during an active chat session and are not permanently stored. <strong>Location access is mandatory</strong> &mdash; the service cannot function without it.</p>
+
+          <h3 class="terms-section-title">2. Google Sign-In</h3>
+          <p class="terms-body">If you choose to sign in with Google, we receive your name and email address via Google&apos;s OAuth 2.0 service solely to create and identify your account. Your Google credentials are never stored by us. By using Google Sign-In you also agree to <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" class="terms-link">Google&apos;s Privacy Policy</a>.</p>
+
+          <h3 class="terms-section-title">3. AI-Powered Responses (OpenAI)</h3>
+          <p class="terms-body">Your transit queries are processed by OpenAI&apos;s language models (e.g. GPT-4). When you send a message, it is transmitted to OpenAI&apos;s servers along with limited conversational context. OpenAI may use anonymised data to improve their models, subject to <a href="https://openai.com/policies/privacy-policy" target="_blank" rel="noopener noreferrer" class="terms-link">OpenAI&apos;s Privacy Policy</a>. By using this service you consent to your queries being processed by OpenAI.</p>
+
+          <h3 class="terms-section-title">4. Durham Region Transit (DRT) Open Data</h3>
+          <p class="terms-body">Transit schedule, route, and stop data is sourced from Durham Region Transit&apos;s publicly available GTFS open data feeds, published under the <a href="https://www.durham.ca/en/regional-government/open-data.aspx" target="_blank" rel="noopener noreferrer" class="terms-link">Durham Region Open Data Licence</a>.</p>
+
+          <h3 class="terms-section-title">5. Accuracy Disclaimer</h3>
+          <p class="terms-body"><strong>Important: Information provided by Commute Assistant &mdash; including schedules, delays, route suggestions, and AI-generated responses &mdash; may be inaccurate, out-of-date, or incomplete.</strong> Real-time transit data depends on live feeds that may be unavailable or delayed. AI responses are generated automatically and may contain errors. <strong>Always verify transit information directly with Durham Region Transit before making travel decisions. Commute Assistant assumes no liability for inaccurate results.</strong></p>
+
+          <h3 class="terms-section-title">6. Data Storage &amp; Security</h3>
+          <p class="terms-body">Your chat history and saved route preferences are stored locally on your device. Your account email and a hashed password are stored securely on our servers. We do not sell your personal data to third parties.</p>
+        </div>
+
+        <div class="terms-actions">
+          <button type="button" class="auth-btn auth-btn--primary" id="btn-accept-terms">
+            I Agree &amp; Continue
+          </button>
+          <button type="button" class="auth-btn auth-btn--decline" id="btn-decline-terms">
+            Decline &amp; Sign Out
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /#auth-overlay -->
+
+  <!-- ── Ad Modal (shown to free users while AI computes answer) ──────────── -->
+  <div id="ad-modal" class="ad-modal hidden" role="dialog" aria-modal="true" aria-label="Loading your answer">
+    <div class="ad-modal__inner">
+      <div class="ad-modal__header">
+        <span class="ad-modal__title">Getting your answer…</span>
+        <span class="ad-modal__timer" id="ad-countdown" aria-live="polite">12</span>
+      </div>
+      <p class="ad-modal__sub">A short ad supports free access</p>
+
+      <!-- AdSense display ad unit — replace slot with your actual slot ID -->
+      <div class="ad-modal__slot">
+        <ins class="adsbygoogle"
+             id="ad-modal-ins"
+             style="display:block;min-height:250px"
+             data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+             data-ad-slot="XXXXXXXXXX"
+             data-ad-format="rectangle"
+             data-full-width-responsive="true"></ins>
+      </div>
+
+      <button id="ad-modal-close" class="btn btn--primary ad-modal__close" disabled aria-disabled="true">
+        Show Answer
+      </button>
+      <button id="btn-upgrade-from-ad" class="btn btn--accent btn--sm ad-modal__upgrade">
+        Upgrade to skip ads
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Upgrade Modal ────────────────────────────────────────────────────── -->
+  <div id="upgrade-modal" class="upgrade-modal hidden" role="dialog" aria-modal="true" aria-label="Upgrade to Premium">
+    <div class="upgrade-card">
+      <button id="btn-upgrade-modal-close" class="upgrade-card__close" aria-label="Close">×</button>
+      <div class="upgrade-card__header">
+        <span class="upgrade-card__icon" aria-hidden="true">⭐</span>
+        <h2 class="upgrade-card__title">Upgrade to Premium</h2>
+        <p class="upgrade-card__sub">Unlimited queries. Zero ads. $2.99 / month.</p>
+      </div>
+
+      <div class="upgrade-tiers">
+        <div class="upgrade-tier upgrade-tier--free">
+          <h3 class="upgrade-tier__name">Free</h3>
+          <ul class="upgrade-tier__features">
+            <li>3 queries per day</li>
+            <li>Ad before each answer</li>
+            <li>5 saved chat sessions</li>
+          </ul>
+          <p class="upgrade-tier__price">$0</p>
+        </div>
+        <div class="upgrade-tier upgrade-tier--premium">
+          <h3 class="upgrade-tier__name">Premium ⭐</h3>
+          <ul class="upgrade-tier__features">
+            <li>Unlimited queries</li>
+            <li>No ads, ever</li>
+            <li>5 saved chat sessions</li>
+          </ul>
+          <p class="upgrade-tier__price">$2.99 <span>/ month</span></p>
+        </div>
+      </div>
+
+      <button id="btn-start-checkout" class="auth-btn auth-btn--primary upgrade-card__cta">
+        Upgrade Now
+      </button>
+      <button id="btn-manage-subscription" class="auth-btn auth-btn--decline upgrade-card__manage hidden">
+        Manage Subscription
+      </button>
+      <p id="upgrade-error" class="upgrade-error hidden" role="alert"></p>
+    </div>
+  </div>
+
+  <!-- ── Ad banner (persistent bottom strip for free users) ───────────────── -->
+  <div id="ad-banner" class="ad-banner hidden" aria-hidden="true">
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+         data-ad-slot="YYYYYYYYYY"
+         data-ad-format="horizontal"
+         data-full-width-responsive="true"></ins>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

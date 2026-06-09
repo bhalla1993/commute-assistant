@@ -1,0 +1,338 @@
+{
+      "info": {
+    "name": "DRT Transit Backend API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth - Signup",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": { "raw": "{{base_url}}/auth/signup", "host": ["{{base_url}}"], "path": ["auth", "signup"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"Password123!\",\n  \"display_name\": \"User\"\n}"
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {},
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"token\": \"jwt_token_here\",\n  \"user\": {\n    \"id\": \"uuid\",\n    \"email\": \"user@example.com\",\n    \"display_name\": \"User\"\n  }\n}"
+        }
+      ]
+    },
+    {
+      "name": "Auth - Login",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"Password123!\"\n}"
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {},
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"token\": \"jwt_token_here\",\n  \"user\": {\n    \"id\": \"uuid\",\n    \"email\": \"user@example.com\",\n    \"display_name\": \"User\"\n  }\n}"
+        }
+      ]
+    },
+    {
+      "name": "Auth - Me",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+        "url": { "raw": "{{base_url}}/auth/me", "host": ["{{base_url}}"], "path": ["auth", "me"] }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {},
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"id\": \"uuid\",\n  \"email\": \"user@example.com\",\n  \"display_name\": \"User\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Auth - Forgot Password",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": { "raw": "{{base_url}}/auth/forgot-password", "host": ["{{base_url}}"], "path": ["auth", "forgot-password"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"user@example.com\"\n}"
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {},
+          "status": "OK",
+          "code": 200,
+          "body": "{ \"message\": \"If that email is registered, you'll receive a reset link shortly.\" }"
+        }
+      ]
+    },
+    {
+      "name": "Auth - Reset Password",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": { "raw": "{{base_url}}/auth/reset-password", "host": ["{{base_url}}"], "path": ["auth", "reset-password"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"token\": \"reset_token_here\",\n  \"new_password\": \"NewPassword123!\"\n}"
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {},
+          "status": "OK",
+          "code": 200,
+          "body": "{ \"message\": \"Password updated successfully. You can now sign in.\" }"
+        }
+      ]
+    },
+    {
+      "name": "Auth - Update Display Name",
+      "request": {
+        "method": "PUT",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+        "url": { "raw": "{{base_url}}/auth/display-name", "host": ["{{base_url}}"], "path": ["auth", "display-name"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"display_name\": \"New Name\"\n}"
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {},
+          "status": "OK",
+          "code": 200,
+          "body": "{ \"display_name\": \"New Name\" }"
+        }
+      ]
+    },
+    {
+      "name": "Chat - Send Message",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+        "url": { "raw": "{{base_url}}/chat", "host": ["{{base_url}}"], "path": ["chat"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"message\": \"When is the next bus?\",\n  \"history\": [],\n  \"latitude\": 43.6532,\n  \"longitude\": -79.3832\n}"
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {},
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"reply\": \"The next bus is at 10:15 AM.\",\n  \"history\": [],\n  \"suggestions\": [\"Show nearby stops\", \"Show service alerts\"]\n}"
+        }
+      ]
+    },
+    {
+      "name": "Chat - Save/Update History",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+        "url": { "raw": "{{base_url}}/chat/history", "host": ["{{base_url}}"], "path": ["chat", "history"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"messages\": [{\"role\": \"user\", \"content\": \"Hi\"}],\n  \"session_id\": null\n}"
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {},
+          "status": "Created",
+          "code": 201,
+          "body": "{ \"session_id\": 1 }"
+        }
+      ]
+    },
+    {
+      "name": "Chat - Get History",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+        "url": { "raw": "{{base_url}}/chat/history", "host": ["{{base_url}}"], "path": ["chat", "history"] }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {},
+          "status": "OK",
+          "code": 200,
+          "body": "{ \"sessions\": [{ \"id\": 1, \"messages\": [{\"role\": \"user\", \"content\": \"Hi\"}], \"created_at\": 1714700000 }] }"
+        }
+      ]
+    },
+    {
+      "name": "Stops - Nearby",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+        "url": {
+          "raw": "{{base_url}}/stops/nearby?lat=43.6532&lon=-79.3832&radius=500",
+          "host": ["{{base_url}}"],
+          "path": ["stops", "nearby"],
+          "query": [
+            { "key": "lat", "value": "43.6532" },
+            { "key": "lon", "value": "-79.3832" },
+            { "key": "radius", "value": "500" }
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {},
+          "status": "OK",
+          "code": 200,
+          "body": "{ \"stops\": [{ \"id\": \"1234\", \"name\": \"Main St\" }], \"count\": 1 }"
+        }
+      ]
+    },
+    {
+      "name": "Delays - By Stop",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+        "url": {
+          "raw": "{{base_url}}/delays/1234?date=20260503",
+          "host": ["{{base_url}}"],
+          "path": ["delays", "1234"],
+          "query": [{ "key": "date", "value": "20260503" }]
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {},
+          "status": "OK",
+          "code": 200,
+          "body": "{ \"stop_id\": \"1234\", \"date\": \"20260503\", \"trips\": [{ \"trip_id\": \"t1\", \"delay\": 120 }] }"
+        }
+      ]
+    },
+    {
+      "name": "Alerts",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+        "url": {
+          "raw": "{{base_url}}/alerts",
+          "host": ["{{base_url}}"],
+          "path": ["alerts"]
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {},
+          "status": "OK",
+          "code": 200,
+          "body": "{ \"alerts\": [], \"count\": 0, \"available\": true, \"unavailable_reason\": null }"
+        }
+      ]
+    },
+    {
+      "name": "Vehicle - By Trip",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+        "url": {
+          "raw": "{{base_url}}/vehicle/t1",
+          "host": ["{{base_url}}"],
+          "path": ["vehicle", "t1"]
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {},
+          "status": "OK",
+          "code": 200,
+          "body": "{ \"trip_id\": \"t1\", \"lat\": 43.6532, \"lon\": -79.3832, \"timestamp\": 1714700000 }"
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{base_url}}/health", "host": ["{{base_url}}"], "path": ["health"] }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {},
+          "status": "OK",
+          "code": 200,
+          "body": "{ \"status\": \"ok\", \"poller\": { \"ok\": true, \"last_poll_at\": 1714700000, \"last_error\": null, \"trip_updates_count\": 10, \"vehicle_positions_count\": 5, \"alerts_count\": 0 } }"
+        }
+      ]
+    },
+    {
+      "name": "AI Status",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{base_url}}/ai-status", "host": ["{{base_url}}"], "path": ["ai-status"] }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {},
+          "status": "OK",
+          "code": 200,
+          "body": "{ \"available\": true, \"provider\": \"openai\" }"
+        }
+      ]
+    },
+    {
+      "name": "Suggestions",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+        "url": {
+          "raw": "{{base_url}}/suggestions?lat=43.6532&lon=-79.3832",
+          "host": ["{{base_url}}"],
+          "path": ["suggestions"],
+          "query": [
+            { "key": "lat", "value": "43.6532" },
+            { "key": "lon", "value": "-79.3832" }
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {},
+          "status": "OK",
+          "code": 200,
+          "body": "{ \"suggestions\": [\"Show nearby stops\", \"Show service alerts\"] }"
+        }
+      ]
+    }
+  ]
+}
