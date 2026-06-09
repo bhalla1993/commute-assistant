@@ -16,24 +16,52 @@ Tech stack
 - Frontend: Vanilla HTML / CSS / JavaScript (single-page static files)
 - Deployment: Docker + Fly.io (recommended)
 
-Quickstart (local)
-1. Create a virtualenv and install deps
+**Quickstart (local)**
+
+1. Create a virtualenv and install dependencies (from repository root)
+
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-pip install -r transit-backend/requirements.txt
+python -m pip install --upgrade pip
+pip install -r requirements.txt
 ```
 
 2. Copy environment variables
-- Create a `.env` file at the repo root. See the `docs/FEATURE_FLAGS.md` and `docs/SUBSCRIPTIONS.md` for required variables.
 
-3. Initialize DB and start server
+- Create a `.env` file at the repo root. See `docs/FEATURE_FLAGS.md` and `docs/SUBSCRIPTIONS.md` for required variables. You can copy the example:
+
 ```bash
-cd transit-backend
-uvicorn api.main:app --reload --port 8000
+cp .env.example .env
+# then edit .env to set secrets and API keys
 ```
 
-4. Open the frontend
+3. Initialize the (local) SQLite DB (optional)
+
+```bash
+mkdir -p transit-backend/data
+if [ -f transit-backend/db/schema.sql ]; then
+  sqlite3 transit-backend/data/transit.db < transit-backend/db/schema.sql
+fi
+```
+
+4. Start the development server
+
+From the backend folder:
+
+```bash
+cd transit-backend
+python -m uvicorn api.main:app --reload --port 8000
+```
+
+Or run from the repo root:
+
+```bash
+python -m uvicorn transit-backend.api.main:app --reload --port 8000
+```
+
+5. Open the frontend
+
 - Visit http://localhost:8000 in your browser to load the UI (served by FastAPI StaticFiles).
 
 Useful commands
