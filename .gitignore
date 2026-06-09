@@ -1,0 +1,3 @@
+.venv
+transit-backend/.venv
+transit-backend/data/transit.db
